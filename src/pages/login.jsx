@@ -9,7 +9,7 @@ const loginSchema = z.object({
     .min(1, "Username atau Email wajib diisi")
     .refine(
       (val) => /\S+@\S+\.\S+/.test(val) || val.length >= 5,
-      "Masukkan username (min 5 karakter) atau email valid"
+      "Masukkan username (min 5 karakter) atau email valid",
     ),
   password: z
     .string()

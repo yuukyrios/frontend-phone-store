@@ -9,7 +9,7 @@ createRoot(document.getElementById("root")).render(
     <SidebarProvider>
       <Route>
         <SidebarTrigger />
-      </Route>  
+      </Route>
     </SidebarProvider>
   </StrictMode>,
 );
