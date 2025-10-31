@@ -11,27 +11,26 @@ import { Input } from "@/components/ui/input";
 import { FormMessage } from "@/components/ui/form";
 import { addUser } from "@/utils/api/users";
 import { X } from "lucide-react";
+import Swal from "sweetalert2";
 
 const addUserSchema = z.object({
   fullname: z
     .string()
     .min(2, { message: "Nama Lengkap harus minimal 2 karakter" }),
   username: z.string().min(2, { message: "Username harus minimal 2 karakter" }),
-  password: z.string().min(2, { message: "Password harus minimal 2 karakter" }),
+  password: z.string().min(6, { message: "Password harus minimal 6 karakter" }),
   email: z.email({ message: "Format email tidak valid" }),
-  phone_number: z
-    .string()
-    .refine((val) => !isNaN(val), "Nomor telepon harus berupa angka")
-    .transform((val) => Number(val)),
+  phone_number: z.string().optional(),
   age: z
     .string()
     .refine((val) => !isNaN(val), "Umur harus berupa angka")
-    .transform((val) => Number(val)),
-  address: z.string().min(2, { message: "Alamat harus minimal 2 karakter" }),
+    .transform((val) => Number(val))
+    .optional(),
+  address: z.string().optional(),
   role: z.enum(["user", "admin"]),
 });
 
-export default function AddUser({ setAddUserPopup }) {
+export default function AddUser({ setAddUserPopup, onSuccess }) {
   const form = useForm({
     resolver: zodResolver(addUserSchema),
     defaultValues: {
@@ -47,13 +46,34 @@ export default function AddUser({ setAddUserPopup }) {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
     try {
       addUser(data);
+      Swal.fire({
+        title: "Sukses",
+        text: "Sukses menambahkan user",
+        icon: "success",
+      });
+      onSuccess();
+      setAddUserPopup(false);
     } catch (err) {
-      console.error("Error adding user:", err);
+      Swal.fire({
+        title: "Error",
+        text: "Gagal menambahkan user: ",
+        err,
+        icon: "error",
+      });
     }
   };
+
+  const forms = [
+    ["Nama Lengkap", "fullname"],
+    ["Username", "username"],
+    ["Password", "password"],
+    ["Email", "email"],
+    ["Nomor Telepon", "phone_number"],
+    ["Umur", "age"],
+    ["Alamat", "address"],
+  ];
 
   return (
     <div
@@ -77,111 +97,25 @@ export default function AddUser({ setAddUserPopup }) {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Nama lengkap */}
-              <FormField
-                control={form.control}
-                name="fullname"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Nama Lengkap</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Nama Lengkap" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Username */}
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Password */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Password</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Email */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Nomor telepon */}
-              <FormField
-                control={form.control}
-                name="phone_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Nomor Telepon</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Nomor Telepon" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Umur */}
-              <FormField
-                control={form.control}
-                name="age"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Umur</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Umur" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Alamat */}
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel data-error="false">Alamat</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Masukkan Alamat" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Submit</Button>
+              {forms.map(([label, value]) => (
+                <FormField
+                  control={form.control}
+                  name={value}
+                  key={label}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel data-error="false">{label}</FormLabel>
+                      <FormControl>
+                        <Input placeholder={`Masukkan ${label}`} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+              <Button type="submit" className="cursor-pointer">
+                Submit
+              </Button>
             </form>
           </Form>
         </div>

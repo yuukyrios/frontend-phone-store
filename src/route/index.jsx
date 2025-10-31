@@ -15,4 +15,3 @@ export default function Route() {
   ]);
   return <RouterProvider router={router} />;
 }
-
